@@ -50,7 +50,6 @@ button:hover {
     height: 100%;
     width: 25%;
 }
-
 .popover {
     visibility: hidden;
     width: 100%;
@@ -100,4 +99,26 @@ button:hover {
 .amenities:hover .popover,
 .locations:hover .popover {
     visibility: visible;
+}
+
+.amenity {
+    display: flex;
+    margin-left: 10px;
+}
+
+.amenity>span {
+    margin-left: 10px;
+}
+
+.amenities h4 {
+    display: block;
+    width: 100%;
+    /* overflow: hidden; */
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+}
+
+#placename {
+    display: inline;
 }
