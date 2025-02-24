@@ -92,12 +92,20 @@ $(function () {
                 <div class="number_rooms">${bdrmInfo}</div>
                 <div class="number_bathrooms">${bthrmInfo}</div>
               </div>
+              <div class="reviews">
+                <h2><span><span class="review-count">0</span> Reviews</span> <span class="toggle-reviews" data-place-id="${place.id}">show</span></h2>
+                <div class="review-list"></div>
+              </div>
               <div class="user"><span>Owner: ${owner}</span></div>
               <div class="description">${safeDescription}</div>
             </article>
           `);
           article.find('.description').html(safeDescription);
           $('.places').append(article);
+
+          $.get(`http://127.0.0.1:5001/api/v1/places/${place.id}/reviews/`, function (reviews) {
+            article.find('.review-count').text(reviews.length);
+          });
         });
       },
       error: function (xhr, status, error) {
@@ -111,4 +119,50 @@ $(function () {
   });
 
   fetchPlaces();
+
+  $(document).on('click', '.toggle-reviews', function () {
+    const span = $(this);
+    const placeId = span.attr('data-place-id');
+    const reviewList = span.closest('.reviews').find('.review-list');
+
+    if (span.text() === 'show') {
+      $.ajax({
+        url: `http://127.0.0.1:5001/api/v1/places/${placeId}/reviews/`,
+        type: 'GET',
+        dataType: 'json',
+        success: function (reviews) {
+          console.log('success');
+          reviewList.empty();
+
+          if (reviews.length === 0) {
+            reviewList.append('<p>No reviews available.</p>');
+          } else {
+            const ul = $('<ul></ul>');
+            reviews.forEach(review => {
+              const reviewDate = new Date(review.created_at).toLocaleDateString();
+              const userName = review.user ? `${review.user.first_name} ${review.user.last_name}` : 'Anonymous';
+
+              const reviewItem = $(`
+                <li>
+                  <h3>From ${userName} on ${reviewDate}</h3>
+                  <p>${$('<div>').text(review.text).html()}</p>
+                </li>
+              `);
+              ul.append(reviewItem);
+            });
+
+            reviewList.append(ul);
+          }
+
+          span.text('hide');
+        },
+        error: function () {
+          reviewList.html('<p>Error loading reviews.</p>');
+        }
+      });
+    } else {
+      reviewList.empty();
+      span.text('show');
+    }
+  });
 });
